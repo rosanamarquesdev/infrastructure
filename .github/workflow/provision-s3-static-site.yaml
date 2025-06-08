@@ -1,46 +1,46 @@
-name: Create S3 Static Site
+name: Deploy S3 Static Site
 
-on: 
+on:
   issues:
-    types: [opened]
+    types:
+      - opened
 
 jobs:
-  provision-s3-static-site:
+  deploy:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, 'front')
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-        
-      - name: Extract Bucket Name from Issue Title
-        id: extract-bucket-name
+          aws-region: us-east-1  
+
+      - name: Extract Bucket Name from Issue
         run: |
-          # Sanitize bucket name (S3 naming requirements)
-          BUCKET_NAME=$(echo "${{ github.event.issue.title }}" | tr -cd '[:alnum:]-' | tr '[:upper:]' '[:lower:]')
+          export BUCKET_NAME=$(echo "${{ github.event.issue.title }}")
           echo "Bucket Name: $BUCKET_NAME"
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
       - name: Run Terraform
         run: |
-          cd terraform/s3-bucket-static 
+          cd terraform
+          cd s3-static-website
           terraform init
           terraform apply -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
 
-      - name: Add Comment to Issue
+      - name: Add comment
         run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
-          BODY: "✅ O bucket S3 foi criado com sucesso!\n\nURL: http://static-site-${{ env.BUCKET_NAME }}.s3-website-us-east-1.amazonaws.com"
+          BODY: >
+            O bucket S3 foi criado com sucesso! 🎉
+
 
