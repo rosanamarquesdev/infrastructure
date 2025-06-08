@@ -1,5 +1,27 @@
+# provider "aws" {
+#   region = "us-east-1"  
+# }
+
+# variable "bucket_name" {
+#   type = string
+# }
+
+# resource "aws_s3_bucket" "static_site_bucket" {
+#   bucket = "static-site-${var.bucket_name}"
+
+#   website {
+#     index_document = "index.html"
+#     error_document = "error.html"
+#   }
+
+#   tags = {
+#     Name        = "Static Site Bucket"
+#     Environment = "Production"
+#   }
+# }
+
 provider "aws" {
-  region = "us-east-1"  
+  region = "us-east-1"
 }
 
 variable "bucket_name" {
@@ -8,15 +30,21 @@ variable "bucket_name" {
 
 resource "aws_s3_bucket" "static_site_bucket" {
   bucket = "static-site-${var.bucket_name}"
-
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
-  }
-
   tags = {
     Name        = "Static Site Bucket"
     Environment = "Production"
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "static_site_config" {
+  bucket = aws_s3_bucket.static_site_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
   }
 }
 
