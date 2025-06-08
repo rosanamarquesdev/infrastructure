@@ -1,0 +1,51 @@
+name: Create S3 Static Site
+
+on: 
+  issues:
+    types: [opened]
+
+jobs:
+  provision-s3-static-site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+        
+      - name: Extract Bucket Name from Issue Title
+        id: extract-bucket-name
+        run: |
+          # Sanitize bucket name (S3 naming requirements)
+          BUCKET_NAME=$(echo "${{ github.event.issue.title }}" | tr -cd '[:alnum:]-' | tr '[:upper:]' '[:lower:]')
+          echo "Bucket Name: $BUCKET_NAME"
+          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Run Terraform
+        run: |
+          cd terraform/s3-bucket-static
+          terraform init
+          terraform apply -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
+
+      - name: Add Comment to Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ S3 bucket successfully created!
+              
+              Website URL: http://static-site-${{ env.BUCKET_NAME }}.s3-website-us-east-1.amazonaws.com`
+            })
+
