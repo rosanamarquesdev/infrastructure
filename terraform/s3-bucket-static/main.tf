@@ -30,6 +30,8 @@ variable "bucket_name" {
 
 resource "aws_s3_bucket" "static_site_bucket" {
   bucket = "static-site-${var.bucket_name}"
+
+  object_lock_enabled = false # Desativa o lock para evitar chamadas automáticas de leitura
   tags = {
     Name        = "Static Site Bucket"
     Environment = "Production"
@@ -84,4 +86,21 @@ resource "aws_s3_bucket_acl" "static_site_bucket" {
 
   bucket = aws_s3_bucket.static_site_bucket.id
   acl    = "public-read"
+}
+
+resource "aws_s3_bucket_policy" "public_policy" {
+  bucket = aws_s3_bucket.static_site_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject",
+        Effect    = "Allow",
+        Principal = "*",
+        Action    = "s3:GetObject",
+        Resource  = "${aws_s3_bucket.static_site_bucket.arn}/*"
+      }
+    ]
+  })
 }
