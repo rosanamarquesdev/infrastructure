@@ -38,7 +38,6 @@ jobs:
           cd terraform
           cd s3-bucket-static
           terraform init
-          terraform plan -var="bucket_name=${{ env.BUCKET_NAME }}"
           terraform apply -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
 
       - name: Add comment
