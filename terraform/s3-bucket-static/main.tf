@@ -36,6 +36,18 @@ resource "aws_s3_bucket" "static_site_bucket" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "static_site_cors" {
+  bucket = aws_s3_bucket.static_site_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
 resource "aws_s3_bucket_website_configuration" "static_site_config" {
   bucket = aws_s3_bucket.static_site_bucket.id
 
