@@ -88,6 +88,9 @@ resource "aws_s3_bucket_acl" "static_site_bucket" {
   acl    = "public-read"
 }
 resource "aws_s3_bucket_policy" "public_policy" {
+  depends_on = [
+    aws_s3_bucket_public_access_block.static_site_bucket
+  ]
 
   bucket = aws_s3_bucket.static_site_bucket.id
 
