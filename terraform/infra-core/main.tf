@@ -79,7 +79,6 @@
 
     lifecycle {
         ignore_changes = [
-        signing_profile_version_arn,
         signing_job_arn
         ]
     }
