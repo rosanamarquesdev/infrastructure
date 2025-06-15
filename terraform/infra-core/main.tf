@@ -77,12 +77,6 @@
         security_group_ids = [aws_security_group.lambda_sg.id]
     }
 
-    lifecycle {
-        ignore_changes = [
-        signing_job_arn
-        ]
-    }
-
     depends_on = [
         aws_iam_role_policy.lambda_vpc_permissions,
         aws_subnet.private,
