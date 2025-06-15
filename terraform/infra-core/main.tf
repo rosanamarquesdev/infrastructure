@@ -10,6 +10,7 @@
         }
         }]
     })
+    
     }
 
     resource "aws_iam_role_policy" "lambda_vpc_permissions" {
