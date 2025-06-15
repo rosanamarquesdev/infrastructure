@@ -12,11 +12,6 @@
     })
     }
 
-    resource "aws_iam_role_policy_attachment" "lambda_logs" {
-    role       = aws_iam_role.lambda_exec.name
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-    }
-
     resource "aws_iam_role_policy" "lambda_vpc_permissions" {
     name = "lambda-vpc-access"
     role = aws_iam_role.lambda_exec.id
@@ -80,7 +75,6 @@
     }
 
     depends_on = [
-        aws_iam_role_policy_attachment.lambda_logs,
         aws_iam_role_policy.lambda_vpc_permissions,
         aws_subnet.private,
         aws_security_group.lambda_sg
