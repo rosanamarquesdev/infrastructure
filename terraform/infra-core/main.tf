@@ -75,7 +75,11 @@
     }
     lifecycle {
         ignore_changes = [
-            code_signing_config_arn
+        source_code_hash,
+        qualified_arn,
+        qualified_invoke_arn,
+        version,
+        publish
         ]
     }
 
