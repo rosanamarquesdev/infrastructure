@@ -10,13 +10,17 @@ resource "aws_s3_bucket" "static_site_bucket" {
   bucket = "static-site-${var.bucket_name}"
 
   object_lock_enabled = false
+
   tags = {
     Name        = "Static Site Bucket"
     Environment = "Production"
   }
 
   lifecycle {
+    create_before_destroy = false
+    prevent_destroy       = false
     ignore_changes = [
+      name,
       server_side_encryption_configuration,
       replication_configuration
     ]
@@ -58,6 +62,7 @@ resource "aws_s3_bucket_public_access_block" "static_site_bucket" {
 
 resource "aws_s3_bucket_ownership_controls" "static_site_bucket" {
   bucket = aws_s3_bucket.static_site_bucket.id
+
   rule {
     object_ownership = "BucketOwnerPreferred"
   }

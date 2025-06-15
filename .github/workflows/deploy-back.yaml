@@ -33,10 +33,13 @@ jobs:
           terraform apply -auto-approve -var="bucket_name=site-devops-backend"
           echo "API_URL=$(terraform output -raw api_gateway_url)" >> $GITHUB_ENV
 
+      - name: Instalar GitHub CLI
+        uses: cli/cli-action@v2
+
       - name: Comentar na issue
         run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
           BODY: |
