@@ -1,25 +1,3 @@
-# provider "aws" {
-#   region = "us-east-1"  
-# }
-
-# variable "bucket_name" {
-#   type = string
-# }
-
-# resource "aws_s3_bucket" "static_site_bucket" {
-#   bucket = "static-site-${var.bucket_name}"
-
-#   website {
-#     index_document = "index.html"
-#     error_document = "error.html"
-#   }
-
-#   tags = {
-#     Name        = "Static Site Bucket"
-#     Environment = "Production"
-#   }
-# }
-
 provider "aws" {
   region = "us-east-1"
 }
@@ -31,10 +9,17 @@ variable "bucket_name" {
 resource "aws_s3_bucket" "static_site_bucket" {
   bucket = "static-site-${var.bucket_name}"
 
-  object_lock_enabled = false # Desativa o lock para evitar chamadas automáticas de leitura
+  object_lock_enabled = false
   tags = {
     Name        = "Static Site Bucket"
     Environment = "Production"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      server_side_encryption_configuration,
+      replication_configuration
+    ]
   }
 }
 
@@ -80,13 +65,14 @@ resource "aws_s3_bucket_ownership_controls" "static_site_bucket" {
 
 resource "aws_s3_bucket_acl" "static_site_bucket" {
   depends_on = [
-	aws_s3_bucket_public_access_block.static_site_bucket,
-	aws_s3_bucket_ownership_controls.static_site_bucket,
+    aws_s3_bucket_public_access_block.static_site_bucket,
+    aws_s3_bucket_ownership_controls.static_site_bucket,
   ]
 
   bucket = aws_s3_bucket.static_site_bucket.id
   acl    = "public-read"
 }
+
 resource "aws_s3_bucket_policy" "public_policy" {
   depends_on = [
     aws_s3_bucket_public_access_block.static_site_bucket
