@@ -58,6 +58,12 @@ resource "aws_lambda_function" "dummy_lambda" {
     subnet_ids         = [aws_subnet.private.id]
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_logs,
+    aws_subnet.private,
+    aws_security_group.lambda_sg
+  ]
 }
 
 resource "aws_apigatewayv2_api" "http_api" {
@@ -91,6 +97,8 @@ resource "aws_lambda_permission" "apigw_permission" {
   function_name = aws_lambda_function.dummy_lambda.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
+
+  depends_on = [aws_apigatewayv2_stage.default]
 }
 
 resource "aws_dynamodb_table" "dummy_table" {
@@ -109,6 +117,8 @@ resource "aws_vpc_endpoint" "dynamodb_endpoint" {
   service_name      = "com.amazonaws.us-east-1.dynamodb"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_vpc.main.default_route_table_id]
+
+  depends_on = [aws_vpc.main]
 }
 
 output "api_gateway_url" {
