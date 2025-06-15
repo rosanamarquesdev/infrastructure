@@ -41,6 +41,3 @@ jobs:
           REPO: ${{ github.repository }}
           BODY: |
             ✅ Backend serverless provisionado com sucesso!
-
-            🔗 URL do endpoint da API:
-            ${{ env.API_URL }}

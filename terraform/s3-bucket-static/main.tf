@@ -15,12 +15,12 @@ resource "aws_s3_bucket" "static_site_bucket" {
     Environment = "Production"
   }
 
-  lifecycle {
-    ignore_changes = [
-      server_side_encryption_configuration,
-      replication_configuration
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     server_side_encryption_configuration,
+  #     replication_configuration
+  #   ]
+  # }
 }
 
 resource "aws_s3_bucket_cors_configuration" "static_site_cors" {
