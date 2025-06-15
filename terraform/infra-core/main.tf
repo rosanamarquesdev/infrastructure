@@ -69,17 +69,18 @@
     filename      = "${path.module}/lambda/lambda.zip"
     memory_size   = 128
     timeout       = 1
+    publish       = false
+    skip_destroy  = true
+
     vpc_config {
         subnet_ids         = [aws_subnet.private.id]
         security_group_ids = [aws_security_group.lambda_sg.id]
     }
+
     lifecycle {
         ignore_changes = [
-        source_code_hash,
-        qualified_arn,
-        qualified_invoke_arn,
-        version,
-        publish
+        signing_profile_version_arn,
+        signing_job_arn
         ]
     }
 
@@ -89,6 +90,7 @@
         aws_security_group.lambda_sg
     ]
     }
+
 
     resource "aws_apigatewayv2_api" "http_api" {
     name          = "http-api"
