@@ -36,7 +36,7 @@ jobs:
             echo "❌ ERRO: api_gateway_url não foi encontrado no output do Terraform."
             exit 1
           fi
-          echo "API_URL=$API_URL" >> $GITHUB_ENV
+          printf "API_URL=%s\n" "$API_URL" >> $GITHUB_ENV
           
 
       - name: Comentar na issue
