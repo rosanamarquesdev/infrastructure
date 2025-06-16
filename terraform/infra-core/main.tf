@@ -139,8 +139,3 @@
 
     depends_on = [aws_vpc.main]
     }
-
-    output "api_gateway_url" {
-    description = "URL pública do endpoint HTTP API Gateway"
-    value       = aws_apigatewayv2_api.http_api.api_endpoint
-    }
