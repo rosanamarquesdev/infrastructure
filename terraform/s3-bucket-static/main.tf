@@ -6,32 +6,23 @@ variable "bucket_name" {
   type = string
 }
 
+data "aws_caller_identity" "current" {}
+
+resource "aws_s3_account_public_access_block" "global_disable" {
+  account_id              = data.aws_caller_identity.current.account_id
+  block_public_acls       = false
+  ignore_public_acls      = false
+  block_public_policy     = false
+  restrict_public_buckets = false
+}
+
 resource "aws_s3_bucket" "static_site_bucket" {
   bucket = "static-site-${var.bucket_name}"
-
   object_lock_enabled = false
+
   tags = {
     Name        = "Static Site Bucket"
     Environment = "Production"
-  }
-
-  # lifecycle {
-  #   ignore_changes = [
-  #     server_side_encryption_configuration,
-  #     replication_configuration
-  #   ]
-  # }
-}
-
-resource "aws_s3_bucket_cors_configuration" "static_site_cors" {
-  bucket = aws_s3_bucket.static_site_bucket.id
-
-  cors_rule {
-    allowed_headers = ["*"]
-    allowed_methods = ["GET", "HEAD"]
-    allowed_origins = ["*"]
-    expose_headers  = ["ETag"]
-    max_age_seconds = 3000
   }
 }
 
@@ -44,6 +35,18 @@ resource "aws_s3_bucket_website_configuration" "static_site_config" {
 
   error_document {
     key = "error.html"
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "static_site_cors" {
+  bucket = aws_s3_bucket.static_site_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
   }
 }
 
@@ -75,6 +78,7 @@ resource "aws_s3_bucket_acl" "static_site_bucket" {
 
 resource "aws_s3_bucket_policy" "public_policy" {
   depends_on = [
+    aws_s3_account_public_access_block.global_disable,
     aws_s3_bucket_public_access_block.static_site_bucket,
     aws_s3_bucket_ownership_controls.static_site_bucket
   ]
