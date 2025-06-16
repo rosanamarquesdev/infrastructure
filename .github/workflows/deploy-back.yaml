@@ -31,7 +31,7 @@ jobs:
           cd terraform
           terraform init
           terraform apply -auto-approve -var="bucket_name=site-devops-backend"
-          RAW_OUTPUT=$(terraform output api_gateway_url 2>/dev/null | grep -Eo 'https://[^"]+')
+          API_URL=$(terraform output api_gateway_url 2>/dev/null | sed 's/"//g' | tr -d '\r')
           if [[ -z "$RAW_OUTPUT" ]]; then
             echo "❌ ERRO: api_gateway_url não foi encontrado corretamente."
             exit 1
