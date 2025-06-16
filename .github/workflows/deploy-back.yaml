@@ -31,7 +31,13 @@ jobs:
           cd terraform
           terraform init
           terraform apply -auto-approve -var="bucket_name=site-devops-backend"
-          echo "API_URL=$(terraform output -raw api_gateway_url)" >> $GITHUB_ENV
+          API_URL=$(terraform output -raw api_gateway_url 2>/dev/null || echo "")
+          if [[ -z "$API_URL" ]]; then
+            echo "❌ ERRO: api_gateway_url não foi encontrado no output do Terraform."
+            exit 1
+          fi
+          echo "API_URL=$API_URL" >> $GITHUB_ENV
+          
 
       - name: Comentar na issue
         run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
