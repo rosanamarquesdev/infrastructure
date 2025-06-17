@@ -32,21 +32,22 @@ jobs:
           terraform init
           terraform apply -auto-approve -var="bucket_name=site-devops-backend"
 
-          API_URL=$(terraform output -raw api_gateway_url 2>/dev/null | tr -d '\r')
+          API_URL=$(terraform output -raw api_gateway_url 2>/dev/null | tr -d '\r\n')
 
           if [[ -z "$API_URL" ]]; then
-            echo "❌ ERRO: api_gateway_url não foi encontrado corretamente."
+            echo "::error ::❌ ERRO: api_gateway_url não foi encontrado corretamente."
             exit 1
           fi
 
           echo "API_URL=$API_URL" >> $GITHUB_ENV
 
       - name: Comentar na issue
-        run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
+        run: |
+          gh issue comment "$NUMBER" \
+            --repo "$REPO" \
+            --body "✅ Backend serverless provisionado com sucesso! 🚀%0A🔗 URL da API: $API_URL"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
-          BODY: |
-            ✅ Backend serverless provisionado com sucesso!
-            🔗 URL da API: ${{ env.API_URL }}
+          API_URL: ${{ env.API_URL }}
